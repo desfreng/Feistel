@@ -1,3 +1,4 @@
 (executable
  (public_name Feistel)
- (name main))
+ (name main)
+ (libraries Feistel))
