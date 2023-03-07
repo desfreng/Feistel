@@ -51,6 +51,39 @@ let to_string = function
   | BitSet (size, set) -> Z.format ("0" ^ string_of_int size ^ "b") set
   | EmptyBitSet -> ""
 
+(** [from_string str] : Return a bitset representing the bitset in [str] *)
+let from_string str =
+  match String.length str with
+  | 0 -> EmptyBitSet
+  | size ->
+      let set = Z.of_string ("0b" ^ str) in
+      BitSet (size, set)
+
+(** [from_int i size] :  Get a BitSet representing the integer [i] with the size [size] *)
+let from_int i size =
+  match (Z.of_int i, size) with
+  | i, _ when i < Z.zero -> raise (Invalid_argument "integer must be positive")
+  | i, size when i = Z.zero && size >= 1 -> BitSet (size, Z.zero)
+  | i, size when size >= Z.numbits i -> BitSet (size, i)
+  | _, _ -> raise (Invalid_argument "size too small")
+
+(** [fits_int bitset] : [true] if [bitset] value can be put into an integer, [false] otherwise *)
+let fits_int = function
+  | BitSet (_, set) -> Z.fits_int set
+  | EmptyBitSet -> false
+
+(** [to_int bitset] : return an integer representing [bitset] value. 
+    
+Raise [Invalid_argument] if [bitset] is empty or too large to be put into a integer *)
+let to_int = function
+  | BitSet (_, set) ->
+      if Z.fits_int set then
+        Z.to_int set
+      else
+        raise (Invalid_argument "BitSet too large to be put into an integer")
+  | EmptyBitSet ->
+      raise (Invalid_argument "Cannot represent an EmptyBitSet in an integer")
+
 (** General function for dealing with binary logic operation
 
 An [EmptyBitSet] is treated as a neutral element. *)
@@ -69,7 +102,8 @@ let _bin_arith_op op left right =
   | BitSet (size_left, set_left), BitSet (size_right, set_right)
     when size_left = size_right ->
       let tmp = op set_left set_right in
-      let rem = Z.rem tmp (_modulus size_right) in
+      let modulus = _modulus size_right in
+      let rem = Z.rem (Z.add modulus (Z.rem tmp modulus)) modulus in
       BitSet (size_right, rem)
   | EmptyBitSet, other -> other
   | other, EmptyBitSet -> other
@@ -102,7 +136,7 @@ let bitset_not = function
 (** [bit_value index bitset] : Get the value of the [index]-nt bit of [bitset] *)
 let bit_value index bitset =
   match (index, bitset) with
-  | index, BitSet (size, set) when index < size && index > 0 ->
+  | index, BitSet (size, set) when index < size && index >= 0 ->
       Z.testbit set index
   | _ ->
       raise
@@ -137,14 +171,6 @@ let rec to_bool_list = function
       let next_bitset = BitSet (size - 1, Z.shift_right_trunc set 1) in
       bit_value 0 bitset :: to_bool_list next_bitset
   | EmptyBitSet -> []
-
-(** [from_int i size] :  Get a BitSet representing the integer [i] with the size [size] *)
-let from_int i size =
-  match (Z.of_int i, size) with
-  | i, _ when i < Z.zero -> raise (Invalid_argument "integer must be positive")
-  | i, size when i = Z.zero && size >= 1 -> BitSet (size, Z.zero)
-  | i, size when size >= Z.numbits i -> BitSet (size, i)
-  | _, _ -> raise (Invalid_argument "size too small")
 
 (** [to_block block_size bitset] : Split [bitset] by chunk of [block_size] bits.
      If [bitset] doesn't have enought bits, it will be completed with [0]. First bits commes first.

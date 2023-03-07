@@ -14,8 +14,19 @@ val to_string : bitset -> string
     
 For the [Empty] bitset, it give an empty string. *)
 
+val from_string : string -> bitset
+(** [from_string str] : Return a bitset representing the bitset in [str] *)
+
 val from_int : int -> int -> bitset
 (** [from_int i size] :  Get a BitSet representing the integer [i] with the size [size] *)
+
+val fits_int : bitset -> bool
+(** [fits_int bitset] : [true] if [bitset] value can be put into an integer, [false] otherwise *)
+
+val to_int : bitset -> int
+(** [to_int bitset] : return an integer representing [bitset] value. 
+    
+Raise [Invalid_argument] if [bitset] is empty or too large to be put into a integer *)
 
 val bitset_not : bitset -> bitset
 (** Logic not operation with [BitSet]. *)
