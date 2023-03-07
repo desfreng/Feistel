@@ -109,6 +109,11 @@ let _bin_arith_op op left right =
   | other, EmptyBitSet -> other
   | _, _ -> raise (Invalid_argument "Provided BitSet have different size")
 
+(** Logic not operation with [BitSet]. *)
+let bitset_not = function
+  | BitSet (size, set) -> BitSet (size, Z.sub (_max_value size) set)
+  | EmptyBitSet -> EmptyBitSet
+
 (** Logic or operation with [BitSet]. *)
 let bitset_or left right = _bin_logic_op Z.logor left right
 
@@ -128,10 +133,47 @@ let bitset_add left right = _bin_arith_op Z.add left right
 Non-empty BitSets must have the same [size]. *)
 let bitset_sub left right = _bin_arith_op Z.sub left right
 
-(** Logic not operation with [BitSet]. *)
-let bitset_not = function
-  | BitSet (size, set) -> BitSet (size, Z.sub (_max_value size) set)
-  | EmptyBitSet -> EmptyBitSet
+let rec bitset_shift_left bitset shift =
+  match (bitset, shift) with
+  | EmptyBitSet, _ -> EmptyBitSet
+  | _, 0 -> bitset
+  | _, i when i < 0 -> bitset_shift_right bitset (-shift)
+  | BitSet (size, set), shift ->
+      let modulus = _modulus size in
+      let new_set = Z.rem (Z.shift_left set shift) modulus in
+      BitSet (size, new_set)
+
+and bitset_shift_right bitset shift =
+  match (bitset, shift) with
+  | EmptyBitSet, _ -> EmptyBitSet
+  | _, 0 -> bitset
+  | _, i when i < 0 -> bitset_shift_left bitset (-shift)
+  | BitSet (size, set), shift ->
+      let modulus = _modulus size in
+      let new_set = Z.rem (Z.shift_right_trunc set shift) modulus in
+      BitSet (size, new_set)
+
+let rec bitset_rotate_left bitset shift =
+  match (bitset, shift) with
+  | EmptyBitSet, _ -> EmptyBitSet
+  | _, 0 -> bitset
+  | _, i when i < 0 -> bitset_rotate_right bitset (-shift)
+  | bitset, shift ->
+      let bitset_size = size bitset in
+      let left_part = bitset_shift_left bitset shift in
+      let right_part = bitset_shift_right bitset (bitset_size - shift) in
+      bitset_or left_part right_part
+
+and bitset_rotate_right bitset shift =
+  match (bitset, shift) with
+  | EmptyBitSet, _ -> EmptyBitSet
+  | _, 0 -> bitset
+  | _, i when i < 0 -> bitset_rotate_left bitset (-shift)
+  | bitset, shift ->
+      let bitset_size = size bitset in
+      let right_part = bitset_shift_right bitset shift in
+      let left_part = bitset_shift_left bitset (bitset_size - shift) in
+      bitset_or left_part right_part
 
 (** [bit_value index bitset] : Get the value of the [index]-nt bit of [bitset] *)
 let bit_value index bitset =
@@ -192,20 +234,47 @@ let rec to_block block_size bitset =
      First chunk commes at the begining. *)
 let from_block = List.fold_left concatenate EmptyBitSet
 
+let equal bitset1 bitset2 =
+  match (bitset1, bitset2) with
+  | EmptyBitSet, EmptyBitSet -> true
+  | BitSet (size1, set1), BitSet (size2, set2) when size1 = size2 ->
+      Z.equal set1 set2
+  | BitSet (size1, _), BitSet (size2, _) when size1 != size2 ->
+      raise (Invalid_argument "BitSet must have the same size")
+  | _ -> false
+
+(** Alias for [equal] *)
+let ( = ) a b = equal a b
+
+(** Alias for [bitset_not] *)
+let ( ! ) bitset = bitset_not bitset
+
 (** Alias for [bitset_and] *)
-let ( &&& ) = bitset_and
+let ( land ) a b = bitset_and a b
 
 (** Alias for [bitset_or] *)
-let ( ||| ) = bitset_or
+let ( lor ) a b = bitset_or a b
 
 (** Alias for [bitset_xor] *)
-let ( /// ) = bitset_xor
+let ( lxor ) a b = bitset_xor a b
 
 (** Alias for [bitset_add] *)
-let ( +++ ) = bitset_add
+let ( + ) a b = bitset_add a b
 
 (** Alias for [bitset_sub] *)
-let ( --- ) = bitset_sub
+let ( - ) a b = bitset_sub a b
 
 (** Alias for [concatenate] *)
-let ( ^^^ ) = concatenate
+let ( ^ ) a b = concatenate a b
+
+(** Alias for [bitset_shift_left] *)
+let ( <<< ) a b = bitset_shift_left a b
+
+(** Alias for [bitset_shift_right] *)
+let ( >>> ) a b = bitset_shift_right a b
+
+(** Alias for [bitset_rotate_left] *)
+let ( <<> ) a b = bitset_rotate_left a b
+
+(** Alias for [bitset_rotate_right] *)
+let ( <>> ) a b = bitset_rotate_right a b
