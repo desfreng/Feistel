@@ -230,15 +230,22 @@ let rec to_bool_list = function
      If [bitset] doesn't have enought bits, it will be completed with [0]. First bits commes first.
      
 [block_size] must be strictly positive.*)
-let rec to_block block_size bitset =
-  match (block_size, bitset) with
-  | i, _ when i <= 0 -> invalid_arg "block_size must be strictly positive"
-  | block_size, BitSet (size, set) when size <= block_size ->
-      [ BitSet (block_size, set) ]
-  | block_size, BitSet (size, set) ->
-      let next_set, new_block_set = Z.div_rem set (_modulus block_size) in
-      let next_bitset = BitSet (size - block_size, next_set) in
-      BitSet (block_size, new_block_set) :: to_block block_size next_bitset
+let to_block block_size bitset =
+  if block_size < 0 then
+    invalid_arg "block_size must be strictly positive"
+  else if size bitset mod block_size != 0 then
+    invalid_arg "bitset size must be a multiple of block_size"
+  else
+    let rec _loop remaining_bitset =
+      match remaining_bitset with
+      | BitSet (size, _) when size = block_size -> [ remaining_bitset ]
+      | BitSet (size, set) when size > block_size ->
+          let next_set, new_block_set = Z.div_rem set (_modulus block_size) in
+          let next_bitset = BitSet (size - block_size, next_set) in
+          BitSet (block_size, new_block_set) :: _loop next_bitset
+      | _ -> failwith "Error ?!"
+    in
+    _loop bitset
 
 (** [from_block block_list] : return the concatenation of all the bitset in [block_list].
      First chunk commes at the begining. 

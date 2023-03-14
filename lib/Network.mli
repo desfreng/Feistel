@@ -20,7 +20,7 @@ module type t = sig
   val number_of_round : int
   (** Number of round of this network *)
 
-  val to_key : BitSet.t -> key
+  val build_key : BitSet.t -> key
   (** Return the key encoded by provided bitset *)
 
   val gen_round_key : key -> int -> round_key
@@ -35,9 +35,6 @@ module type t = sig
   val round_function : round_key -> BitSet.t -> BitSet.t
   (** Round Function of the Network *)
 end
-
-(** Build a Cipher according given Feistel Network *)
-module Make (Net : t) : Cipher.t with type key = Net.key
 
 module Lucifer : t
 module SDES : t

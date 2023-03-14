@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Dune Build",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/launch.py",
+            "args": [
+                "--build"
+            ],
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "Dune Watch Build",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/launch.py",
+            "args": [
+                "--watch"
+            ],
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "Dune Exec Feistel",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/launch.py",
+            "args": [
+                "--exec",
+                "Feistel"
+            ],
+            "console": "integratedTerminal",
+        }
+    ]
+}

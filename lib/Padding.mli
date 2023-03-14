@@ -1,4 +1,7 @@
 module type t = sig
+  val byte_padding : bool
+  (** [true] if padding scheme is a byte padding one. *)
+
   val pad : BitSet.t -> int -> BitSet.t
   (* [pad bitset mult] : Return a [bitset] with a size such as [size bitset mod mult = 0] *)
 
