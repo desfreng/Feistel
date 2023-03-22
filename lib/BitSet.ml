@@ -96,6 +96,25 @@ let to_int64 = function
       else
         invalid_arg "BitSet too large to be put into an integer"
 
+(** [from_Z i size] :  Get a BitSet representing the Zarith Integer [i] with the size [size] *)
+let from_Z i size =
+  if size >= Z.numbits i then
+    BitSet (size, i)
+  else
+    invalid_arg "size too small"
+
+(** [from_bytes bytes size] : Convert the Bytes [bytes] into a BitSet of size [size]. *)
+let from_bytes bytes size =
+  let set = Z.of_bits (Bytes.to_string bytes) in
+  if size < Z.numbits set then (
+    Printf.printf "%s | %i" (Z.to_string set) (Z.numbits set);
+    invalid_arg "Size to small to contain provided Bytes"
+  ) else
+    BitSet (size, set)
+
+(** [to_bytes bitset] : Convert  [bitset] into a Bytes strcuture. *)
+let to_bytes = function BitSet (_, set) -> Z.to_bits set |> String.to_bytes
+
 (** General function for dealing with binary logic operation
 
 An [EmptyBitSet] is treated as a neutral element. *)
@@ -314,8 +333,8 @@ let pick bitset index_list =
   fst
     (List.fold_left
        (fun (acc, index) elm ->
-         (set_bit index (bit_value elm bitset) acc, index - 1))
-       (zeros new_bitset_size, new_bitset_size - 1)
+         (set_bit index (bit_value elm bitset) acc, index + 1))
+       (zeros new_bitset_size, 0)
        index_list)
 
 (**  [equal a b] : [true] if [a] and [b] represent the same BitSet

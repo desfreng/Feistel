@@ -6,7 +6,7 @@ module type t = sig
   (* [pad bitset mult] : Return a [bitset] with a size such as [size bitset mod mult = 0] *)
 
   val unpad : BitSet.t -> BitSet.t
-  (* [unpad bitset] : Return the original [bitset] *)
+  (* [unpad bitset mult] : Return the original [bitset] who has been padded with the multiple [mult] *)
 end
 
 module RFC_1321 : t

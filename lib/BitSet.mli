@@ -36,6 +36,14 @@ val to_int64 : t -> int64
     
 Raise [invalid_arg] if [bitset] is empty or too large to be put into an int64 *)
 
+val from_Z : Z.t -> int -> t
+
+val from_bytes : Bytes.t -> int -> t
+(** [from_bytes bytes size] : Convert the Bytes [bytes] into a BitSet of size [size]. *)
+
+val to_bytes : t -> Bytes.t
+(** [to_bytes bitset] : Convert  [bitset] into a Bytes strcuture. *)
+
 val bitset_not : t -> t
 (** Logic not operation with [BitSet]. *)
 

@@ -79,70 +79,70 @@ module Lucifer : t = struct
     else
       BitSet.pick input
         [
-          53;
-          42;
-          11;
-          7;
-          36;
-          62;
-          16;
-          25;
-          45;
-          34;
-          3;
-          63;
-          28;
-          54;
-          8;
-          17;
-          37;
-          26;
-          59;
-          55;
-          20;
-          46;
-          0;
-          9;
-          29;
-          18;
-          51;
-          47;
-          12;
-          38;
-          56;
-          1;
-          21;
           10;
-          43;
-          39;
-          4;
-          30;
-          48;
-          57;
-          13;
-          2;
-          35;
-          31;
-          60;
-          22;
-          40;
-          49;
-          5;
-          58;
-          27;
-          23;
+          21;
           52;
-          14;
-          32;
-          41;
-          61;
-          50;
-          19;
-          15;
-          44;
-          6;
+          56;
+          27;
+          1;
+          47;
+          38;
+          18;
+          29;
+          60;
+          0;
+          35;
+          9;
+          55;
+          46;
+          26;
+          37;
+          4;
+          8;
+          43;
+          17;
+          63;
+          54;
+          34;
+          45;
+          12;
+          16;
+          51;
+          25;
+          7;
+          62;
+          42;
+          53;
+          20;
           24;
+          59;
           33;
+          15;
+          6;
+          50;
+          61;
+          28;
+          32;
+          3;
+          41;
+          23;
+          14;
+          58;
+          5;
+          36;
+          40;
+          11;
+          49;
+          31;
+          22;
+          2;
+          13;
+          44;
+          48;
+          19;
+          57;
+          39;
+          30;
         ]
 
   let gen_round_key key round =
@@ -186,10 +186,10 @@ module SDES : t = struct
   type key = Key of BitSet.t
   type round_key = RoundKey of BitSet.t
 
-  let begin_enc_function bitset = BitSet.pick bitset [ 6; 2; 5; 7; 4; 0; 3; 1 ]
-  let end_enc_function bitset = BitSet.(bitset <<> 1)
-  let begin_dec_function bitset = BitSet.(bitset <>> 1)
-  let end_dec_function bitset = BitSet.pick bitset [ 4; 7; 5; 3; 1; 6; 0; 2 ]
+  let begin_enc_function bitset = BitSet.pick bitset [ 1; 5; 2; 0; 3; 7; 4; 6 ]
+  let end_enc_function bitset = BitSet.pick bitset [ 3; 0; 2; 4; 6; 1; 7; 5 ]
+  let begin_dec_function = begin_enc_function
+  let end_dec_function = end_enc_function
   let number_of_round = 2
   let _p10 bitset = BitSet.pick bitset [ 7; 5; 8; 3; 6; 0; 9; 1; 2; 4 ]
   let _p8 bitset = BitSet.pick bitset [ 4; 7; 3; 6; 2; 5; 0; 1 ]

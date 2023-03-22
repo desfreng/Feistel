@@ -73,7 +73,8 @@ module ANSI_X923 : t = struct
     else
       let bytes_size = bitset_size / 8 in
       let bits_to_remove = 8 * BitSet.byte_value (bytes_size - 1) bitset in
-      BitSet.extract bitset 0 (bitset_size - bits_to_remove)
+      let new_size = bitset_size - bits_to_remove in
+      BitSet.extract bitset 0 new_size
 end
 
 module PKCS7 : t = struct
@@ -110,7 +111,8 @@ module PKCS7 : t = struct
     else
       let bytes_size = bitset_size / 8 in
       let bits_to_remove = 8 * BitSet.byte_value (bytes_size - 1) bitset in
-      BitSet.extract bitset 0 (bitset_size - bits_to_remove)
+      let new_size = bitset_size - bits_to_remove in
+      BitSet.extract bitset 0 new_size
 end
 
 module Zero : t = struct

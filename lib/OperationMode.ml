@@ -57,27 +57,26 @@ module CTR (C : Cipher.t) = struct
       The Initialisation Vector [iv] is used to initialise the [Mode] of operation *)
   let encrypt_blocs iv key plaintext_blocs =
     let size_iv = BitSet.size iv in
+    let max_index = Z.shift_left Z.one size_iv in
     List.fold_left
       (fun (block_index, cipher_blocs) plaintext ->
-        let to_encrypt =
-          BitSet.(concatenate iv (from_int block_index size_iv))
-        in
-        ( block_index + 1,
+        let to_encrypt = BitSet.(concatenate iv (from_Z block_index size_iv)) in
+        ( Z.rem (Z.add block_index Z.one) max_index,
           BitSet.(plaintext lxor C.encrypt key to_encrypt) :: cipher_blocs ))
-      (0, []) plaintext_blocs
+      (Z.zero, []) plaintext_blocs
     |> snd |> List.rev
 
   (** [decrypt_blocs iv key ciphertext_blocs] : Decrypt each bloc of [ciphertext_blocs] with the key [key].
       The Initialisation Vector [iv] is used to initialise the [Mode] of operation *)
   let decrypt_blocs iv key ciphertext_blocs =
     let size_iv = BitSet.size iv in
+    let max_index = Z.shift_left Z.one size_iv in
+
     List.fold_left
       (fun (block_index, cipher_blocs) ciphertext ->
-        let to_encrypt =
-          BitSet.(concatenate iv (from_int block_index size_iv))
-        in
-        ( block_index + 1,
+        let to_encrypt = BitSet.(concatenate iv (from_Z block_index size_iv)) in
+        ( Z.rem (Z.add block_index Z.one) max_index,
           BitSet.(ciphertext lxor C.encrypt key to_encrypt) :: cipher_blocs ))
-      (0, []) ciphertext_blocs
+      (Z.zero, []) ciphertext_blocs
     |> snd |> List.rev
 end

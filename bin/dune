@@ -1,4 +1,11 @@
 (executable
  (public_name Feistel)
  (name main)
- (libraries Feistel))
+ (libraries Feistel)
+ (modules main PaddingTest CipherTest))
+
+(executable
+ (public_name EncryptImg)
+ (name EncryptImg)
+ (libraries Feistel yojson)
+ (modules EncryptImg))
